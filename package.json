@@ -1,0 +1,32 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-db:dev": "npx sequelize db:create --env development",
+    "migrate-db:dev": "npx sequelize db:migrate --env development",
+    "seed-db:dev": "npx sequelize db:seed:all --env development",
+    "create-db:prod": "npx sequelize db:create --env production",
+    "migrate-db:prod": "npx sequelize db:migrate --env production",
+    "seed-db:prod": "npx sequelize db:seed:all --env production",
+    "start": "node app.js",
+    "start-nodemon": "nodemon app.js"
+  },
+  "author": "hier",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.5",
+    "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.2",
+    "sequelize-cli": "^6.6.2"
+  }
+}

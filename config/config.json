@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "hiernurul2307",
+    "database": "kidslibrary",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "jKLdDkuKxRSiQDAZVzpyVRlLYEGtDfLV",
+    "database": "railway",
+    "port": "36057",
+    "host": "monorail.proxy.rlwy.net",
+    "dialect": "postgres"
+  }
+}
