@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'Judul is required'
+          msg: 'Judul Wajib Diisi'
         }
       }
     },
@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'Kategori is required'
+          msg: 'Kategori Wajib Diisi'
         }
       }
     },
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'Ringkasan is required'
+          msg: 'Ringkasan Wajib Diisi'
         }
       }
     },
@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'Penulis is required'
+          msg: 'Penulis Wajib Diisi'
         }
       }
     },
@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'Image URL is required'
+          msg: 'Image Wajib Diisi'
         }
       }
     },
@@ -70,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
       validate: {
         notEmpty: {
           args: true,
-          msg: 'Read URL is required'
+          msg: 'Read URL Wajib Diisi'
         }
       }
     }

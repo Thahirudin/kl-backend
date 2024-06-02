@@ -6,7 +6,10 @@ class FavoritController {
 
             // Validasi input
             if (!userId || !bukuId) {
-                return res.status(400).json({ message: 'userId dan bukuId harus diisi' });
+                return res.status(400).json({
+                    status: 'Gagal',
+                    message: 'userId dan bukuId harus diisi'
+                });
             }
 
             // Cek apakah user dan buku ada
@@ -14,23 +17,37 @@ class FavoritController {
             const buku = await Buku.findByPk(bukuId);
 
             if (!user || !buku) {
-                return res.status(404).json({ message: 'User atau Buku tidak ditemukan' });
+                return res.status(404).json({
+                    status: 'Gagal',
+                    message: 'User atau Buku tidak ditemukan'
+                });
             }
 
             // Cek apakah favorit sudah ada
             const existingFavorit = await Favorit.findOne({ where: { userId, bukuId } });
 
             if (existingFavorit) {
-                return res.status(409).json({ message: 'Favorit sudah ada' });
+                return res.status(409).json({
+                    status: 'Gagal',
+                    message: 'Favorit sudah ada'
+                });
             }
 
             // Buat data favorit baru
             const favorit = await Favorit.create({ userId, bukuId });
 
-            res.status(201).json(favorit);
+            res.status(201).json(
+                {
+                    status: 'Berhasil',
+                    message: 'Favorit Berhasil Ditambahkan',
+                    favorit
+                });
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: 'Terjadi kesalahan pada server', error: err });
+            res.status(500).json({
+                status: 'Gagal',
+                message: err,
+            });
         }
     }
 
@@ -56,7 +73,10 @@ class FavoritController {
             const user = await User.findByPk(userId);
 
             if (!user) {
-                return res.status(404).json({ message: 'User tidak ditemukan' });
+                return res.status(404).json({
+                    status: 'Gagal',
+                    message: 'User tidak ditemukan'
+                });
             }
 
             const favorit = await Favorit.findAll({
@@ -68,20 +88,32 @@ class FavoritController {
                 ]
             });
 
-            res.status(200).json(favorit);
+            res.status(200).json({
+                status: 'Berhasil',
+                message: 'Favorit Berhasil Ditampilkan',
+                favorit
+            });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Terjadi kesalahan pada server', error: err });
+            res.status(500).json({
+                status: 'Gagal',
+                message: err
+            });
         }
     }
     static deleteFavorit(req, res) {
         let id = +req.params.id;
         Favorit.destroy({ where: { id } })
             .then(result => {
-                res.status(200).json(result);
+                res.status(200).json({
+                    status: 'Berhasil',
+                    message: 'Favorit Berhasil Dihapus',
+                });
             })
             .catch(err => {
-                res.status(500).json(err)
+                res.status(500).json({
+                    status: 'Gagal',
+                    message: err
+                })
             })
     }
 }

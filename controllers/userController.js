@@ -1,132 +1,217 @@
 const { comparePassword, hashPassword } = require('../helpers/bcrypt');
 const { User } = require('../models');
 const { generateToken } = require('../helpers/jwt');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 
 class UserController {
     static async register(req, res) {
-        const { nama, email, password, username, role, jk, profile } = req.body;
+        const { nama, profil, tanggalLahir, jk, role, username, email, password } = req.body;
         try {
-            // Validasi input
-            if (!nama || !email || !password || !username || !role || !jk) {
-                return res.status(400).json({ message: 'All fields are required' });
-            }
-
-            // Cek apakah email atau username sudah digunakan
             const existingUser = await User.findOne({
                 where: {
-                    [Op.or]: [{ email }, { username }]
+                    [Op.or]: [{ username }]
                 }
             });
 
             if (existingUser) {
-                return res.status(409).json({ message: 'Email or username is already in use' });
+                return res.status(409).json({
+                    status: 'Gagal',
+                    message: 'Username Sudah Pernah Digunakan'
+                });
             }
 
             const hashedPassword = await hashPassword(password);
             const user = await User.create({
                 nama,
-                email,
-                username,
-                role,
+                profil,
+                tanggalLahir,
                 jk,
-                profile,
+                role,
+                username,
+                email,
                 password: hashedPassword
             });
 
             const response = {
-                id: user.id,
-                nama: user.nama,
-                email: user.email,
-                username: user.username,
-                role: user.role,
-                jk: user.jk,
-                profile: user.profile
+                status: 'Berhasil',
+                message: 'User berhasil ditambahkan',
+                user: {
+                    id: user.id,
+                    nama: user.nama,
+                    profil: user.profil,
+                    tanggalLahir: user.tanggalLahir,
+                    jk: user.jk,
+                    role: user.role,
+                    username: user.username,
+                    email: user.email
+                }
             };
-
             res.status(201).json(response);
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal server error' });
+            if (err.name === 'SequelizeValidationError') {
+                const messages = err.errors.map(e => e.message);
+                return res.status(400).json({
+                    status: 'Gagal', messages
+                });
+            }
+            res.status(500).json({
+                status: 'Gagal',
+                message: 'Internal Server Error',
+            });
         }
     }
 
     static async login(req, res) {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
         try {
-            const user = await User.findOne({ where: { email } });
+            const user = await User.findOne({ where: { username: username } });
             if (!user) {
-                return res.status(404).json({ error: 'User Tidak Ditemukan' });
+                return res.status(404).json({
+                    status: 'Gagal',
+                    message: 'User Tidak Ditemukan'
+                });
             }
             const isCorrect = await comparePassword(password, user.password);
             if (!isCorrect) {
-                return res.status(401).json({ error: 'Password Salah' });
+                return res.status(401).json({
+                    status: 'Gagal',
+                    message: 'Password Salah'
+                });
             }
             const token = generateToken({ id: user.id });
             res.status(200).json({ token });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({
+                status: 'Gagal',
+                message: 'Internal server error'
+            });
         }
     }
 
 
     static async GetAllUsers(req, res) {
         try {
-            const result = await User.findAll();
-            res.status(200).json(result);
+            const users = await User.findAll();
+            res.status(200).json({
+                status: 'Berhasil',
+                message: 'Berhasil Menampilkan Data User',
+                users
+            });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({
+                status: 'Gagal',
+                message: 'Internal server error'
+            });
         }
     }
 
     static async GetOneUserById(req, res) {
         const id = +req.params.id;
         try {
-            const result = await User.findByPk(id);
-            if (result) {
-                res.status(200).json(result);
+            const user = await User.findOne({ where: { id: id } });
+            if (user) {
+                res.status(200).json({
+                    status: 'Berhasil',
+                    message: 'Berhasil Menampilkan data User',
+                    user
+                });
             } else {
-                res.status(404).json({ error: 'User not found' });
+                res.status(404).json({
+                    status: 'Gagal',
+                    message: 'User not found'
+                });
             }
         } catch (err) {
             console.error(err);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({ 
+                status: 'Gagal',
+                message: 'Internal server error'
+            });
         }
     }
 
     static async updateUser(req, res) {
         try {
             const userId = req.params.id;
-            const { nama, email, password } = req.body;
+            const { nama, profil, tanggalLahir, jk, role, username, email, password } = req.body;
 
-            // Lakukan validasi data input jika diperlukan
+            // Cari user terlebih dahulu
+            const user = await User.findOne({ where: { id: userId } });
+            if (!user) {
+                return res.status(404).json({
+                    status: 'Gagal',
+                    message: 'User tidak ditemukan'
+                });
+            }
 
-            // Lakukan pembaruan pengguna di dalam database
-            const updatedUser = await User.findByIdAndUpdate(userId, { nama, email, password }, { new: true });
+            // Validasi username
+            if (username) {
+                const existingUser = await User.findOne({
+                    where: {
+                        username,
+                        id: { [Op.ne]: userId } // Cek username milik user lain
+                    }
+                });
+                if (existingUser) {
+                    return res.status(409).json({
+                        status :' Gagal',
+                        message: 'Username sudah digunakan oleh user lain'
+                    });
+                }
+            }
 
-            // Kirim respon dengan pengguna yang telah diperbarui
-            res.status(200).json(updatedUser);
-        } catch (error) {
-            // Tangani kesalahan jika terjadi
-            console.error(error);
-            res.status(500).json({ error: 'Internal server error' });
+            // Jika password di-update, hash password baru
+            let hashedPassword = user.password;
+            if (password) {
+                hashedPassword = await hashPassword(password);
+            }
+
+            // Update user
+            const updatedUser = await user.update({ nama, profil, tanggalLahir, jk, role, username, email, password: hashedPassword });
+            const response = {
+                status: 'Berhasil',
+                message: 'User Berhasil DiUpdate',
+                user: updatedUser
+            }
+            // Kirimkan respons sukses
+            res.status(200).json(response);
+        } catch (err) {
+            if (err.name === 'SequelizeValidationError') {
+                const messages = err.errors.map(e => e.message);
+                return res.status(400).json({
+                    status: 'Gagal',
+                    messages,
+                });
+            }
+            res.status(500).json({
+                status: 'Gagal',
+                message: 'Internal server error'
+            });
         }
     }
+
 
     static async deleteUser(req, res) {
         const id = +req.params.id;
         try {
             const rowsDeleted = await User.destroy({ where: { id } });
             if (rowsDeleted > 0) {
-                res.status(200).json({ message: 'User deleted successfully' });
+                res.status(200).json({
+                    status: 'Berhasil',
+                    message: 'User Berhasil Dihapus'
+                });
             } else {
-                res.status(404).json({ error: 'User not found' });
+                res.status(404).json({
+                    status: 'Gagal',
+                    message: 'User Tidak Ditemukan'
+                });
             }
         } catch (err) {
             console.error(err);
-            res.status(500).json({ error: 'Internal server error' });
+            res.status(500).json({
+                status: 'Gagal',
+                message: 'Internal server error'
+            });
         }
     }
 }

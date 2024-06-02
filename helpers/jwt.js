@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = "Thahirudin";
+const SECRET_KEY = "KidsLibrary2";
 
 function generateToken(payload) {
-    const options = { expiresIn: '1m' }; // Token kedaluwarsa dalam 1 menit
+    const options = { expiresIn: '30m' };
     return jwt.sign(payload, SECRET_KEY, options);
 }
 

@@ -25,10 +25,10 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       },
-      profile: {
+      profil: {
         type: DataTypes.TEXT,
       },
-      ttl: {
+      tanggalLahir: {
         type: DataTypes.DATE,
         allowNull: false,
         validate: {
@@ -48,15 +48,21 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       },
-      email: {
+      username: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         validate: {
           notEmpty: {
             args: true,
-            msg: 'Email is required'
+            msg: 'Username is required'
           },
+        }
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
           isEmail: {
             args: true,
             msg: 'Email is not valid'

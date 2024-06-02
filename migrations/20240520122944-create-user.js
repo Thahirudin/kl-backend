@@ -13,10 +13,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      profile: {
+      profil: {
         type: Sequelize.TEXT
       },
-      ttl: {
+      tanggalLahir: {
         allowNull: false,
         type: Sequelize.DATE
       },
@@ -28,10 +28,14 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      email: {
+      username: {
         allowNull: false,
         type: Sequelize.STRING,
         unique: true
+      },
+      email: {
+        allowNull: true,
+        type: Sequelize.STRING,
       },
       password: {
         allowNull: false,
