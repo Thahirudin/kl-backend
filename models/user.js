@@ -57,15 +57,26 @@ module.exports = (sequelize, DataTypes) => {
             args: true,
             msg: 'Username is required'
           },
+          isLowercase(value) {
+            if (value !== value.toLowerCase()) {
+              throw new Error('Username Harus Huruf Kecil');
+            }
+          },
+          hasNoSpaces(value) {
+            if (/\s/.test(value)) {
+              throw new Error('Username Tidak Boleh Ada Space');
+            }
+          }
         }
       },
       email: {
         type: DataTypes.STRING,
         allowNull: true,
         validate: {
-          isEmail: {
-            args: true,
-            msg: 'Email is not valid'
+          isEmailOrEmpty(value) {
+            if (value && !validator.isEmail(value)) {
+              throw new Error('Email is not valid');
+            }
           }
         }
       },

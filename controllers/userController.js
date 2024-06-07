@@ -2,6 +2,8 @@ const { comparePassword, hashPassword } = require('../helpers/bcrypt');
 const { User } = require('../models');
 const { generateToken } = require('../helpers/jwt');
 const { Op, where } = require('sequelize');
+const path = require('path')
+const fs = require('fs');
 
 class UserController {
     static async register(req, res) {
@@ -78,7 +80,10 @@ class UserController {
                     message: 'Password Salah'
                 });
             }
-            const token = generateToken({ id: user.id });
+            const token = generateToken({
+                id: user.id,
+                role: user.role
+            });
             res.status(200).json({ token });
         } catch (err) {
             res.status(500).json({
@@ -88,13 +93,16 @@ class UserController {
         }
     }
 
-
     static async GetAllUsers(req, res) {
         try {
-            const users = await User.findAll();
+            const totalUser = await User.count();
+            const users = await User.findAll({
+                order: [['id', 'ASC']]
+            });
             res.status(200).json({
                 status: 'Berhasil',
                 message: 'Berhasil Menampilkan Data User',
+                totalUser: totalUser,
                 users
             });
         } catch (err) {
@@ -133,7 +141,7 @@ class UserController {
     static async updateUser(req, res) {
         try {
             const userId = req.params.id;
-            const { nama, profil, tanggalLahir, jk, role, username, email, password } = req.body;
+            const { nama, tanggalLahir, jk, role, username, email, password } = req.body;
 
             // Cari user terlebih dahulu
             const user = await User.findOne({ where: { id: userId } });
@@ -143,7 +151,6 @@ class UserController {
                     message: 'User tidak ditemukan'
                 });
             }
-
             // Validasi username
             if (username) {
                 const existingUser = await User.findOne({
@@ -159,7 +166,15 @@ class UserController {
                     });
                 }
             }
-
+            let profil = user.profil;
+            if (req.file) {
+                profil = "/" + req.file.path.split(path.sep).join('/');
+                if (user.profil) {
+                    fs.unlink(path.join(__dirname, '..', user.profil), (err) => {
+                        if (err) console.error('Error saat menghapus file gambar sebelumnya:', err);
+                    });
+                }
+            }
             // Jika password di-update, hash password baru
             let hashedPassword = user.password;
             if (password) {
