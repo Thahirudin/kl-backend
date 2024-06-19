@@ -25,10 +25,10 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       },
-      profile: {
+      profil: {
         type: DataTypes.TEXT,
       },
-      ttl: {
+      tanggalLahir: {
         type: DataTypes.DATE,
         allowNull: false,
         validate: {
@@ -48,18 +48,35 @@ module.exports = (sequelize, DataTypes) => {
           }
         }
       },
-      email: {
+      username: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         validate: {
           notEmpty: {
             args: true,
-            msg: 'Email is required'
+            msg: 'Username is required'
           },
-          isEmail: {
-            args: true,
-            msg: 'Email is not valid'
+          isLowercase(value) {
+            if (value !== value.toLowerCase()) {
+              throw new Error('Username Harus Huruf Kecil');
+            }
+          },
+          hasNoSpaces(value) {
+            if (/\s/.test(value)) {
+              throw new Error('Username Tidak Boleh Ada Space');
+            }
+          }
+        }
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+          isEmailOrEmpty(value) {
+            if (value && !validator.isEmail(value)) {
+              throw new Error('Email is not valid');
+            }
           }
         }
       },
